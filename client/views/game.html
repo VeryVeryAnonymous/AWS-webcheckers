@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ gameName }} — WebCheckers</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/game.css">
+</head>
+<body data-userid="{{ userId }}" data-username="{{ username }}" data-is-spectator="{% if isSpectator %}true{% else %}false{% endif %}">
+    <nav class="entete">
+        <span class="entete-titre">{{ gameName }}</span>
+        {% if isSpectator %}
+        <span class="badge-spectateur">Mode spectateur</span>
+        {% endif %}
+        <div class="entete-actions">
+            <button id="chat-toggle" type="button" class="bouton bouton-gris bouton-petit" onclick="openChatMenu()">Chat</button>
+            <button type="button" class="bouton bouton-gris bouton-petit" onclick="quitterPartie()">Menu</button>
+        </div>
+    </nav>
+
+    <div class="layout-jeu">
+        <div class="conteneur-plateau">
+            
+            <div class="infos-joueur" id="joueur-haut">
+                <!-- Info adv -->
+                <div class="infos-details">
+                    <span class="joueur-nom" id="nom-haut">En attente...</span>
+                    <span class="joueur-palmares" id="palmares-haut"></span>
+                </div>
+                <div class="joueur-chrono" id="chrono-haut">00:00</div>
+            </div>
+
+            <div class="cadre-plateau">
+                <div class="grille-plateau">
+                    <script>
+                        for (let i = 0; i < 100; i++) {
+                            const row = Math.floor(i / 10);
+                            const col = i % 10;
+                            const isLight = (row + col) % 2 === 0;
+                            const cls = isLight ? 'case-claire' : 'case-foncee';
+                            document.write('<div class="' + cls + '"></div>');  
+                        }
+                    </script>
+                </div>
+            </div>
+            
+            <div class="infos-joueur" id="joueur-bas">
+                <!-- Info soi-même -->
+                <div class="infos-details">
+                    <span class="joueur-nom" id="nom-bas">Vous</span>
+                    <span class="joueur-palmares" id="palmares-bas"></span>
+                </div>
+                <div class="joueur-chrono" id="chrono-bas">00:00</div>
+            </div>
+            
+            <button id="btn-tourner" class="bouton bouton-gris" style="margin-top: 15px;" onclick="tournerDamier()">Tourner le damier</button>
+        </div>
+
+        <aside id="chat-menu" class="panel-chat">
+            <div class="panel-chat-entete">
+                <h2>Chat</h2>
+                <button type="button" class="bouton bouton-gris bouton-petit" onclick="closeChatMenu()">Fermer</button>
+            </div>
+
+            <div id="chat-messages" class="messages-chat"></div>
+
+            <div class="zone-saisie-chat">
+                <form id="chat-form" class="formulaire-chat">
+                    <input id="chat-input" type="text" placeholder="Ecrire un message..." autocomplete="off">
+                    <button type="submit" class="bouton bouton-rouge bouton-petit">Envoyer</button>
+                </form>
+            </div>
+        </aside>
+    </div>
+
+    <script src="/js/GameClient.js"></script>
+    <script src="/js/game.js"></script>
+</body>
+</html>

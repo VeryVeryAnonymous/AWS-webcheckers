@@ -1,0 +1,59 @@
+/* =====================================================================
+   Pages Compte — Login / Register
+   ===================================================================== */
+
+.page-compte {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.carte-compte {
+    width: 100%;
+    max-width: 440px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--bordure);
+    border-radius: var(--radius-lg);
+    padding: 44px 36px;
+    box-shadow: var(--ombre);
+}
+
+.carte-compte h1 {
+    text-align: center;
+    margin-bottom: 8px;
+    font-size: 32px;
+    color: var(--dore);
+}
+
+.carte-compte .sous-titre {
+    text-align: center;
+    color: var(--texte-secondaire);
+    margin-bottom: 28px;
+    font-size: 15px;
+}
+
+.carte-compte .erreur {
+    background-color: rgba(192, 57, 43, 0.15);
+    border: 1px solid var(--rouge);
+    color: var(--rouge-hover);
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.carte-compte .bouton {
+    width: 100%;
+    margin-top: 8px;
+    padding: 14px;
+    font-size: 16px;
+}
+
+.carte-compte .lien-compte {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+}

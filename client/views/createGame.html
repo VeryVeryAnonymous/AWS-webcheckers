@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle partie — WebCheckers</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/createGame.css">
+</head>
+<body>
+    <nav class="entete">
+        <span class="entete-titre">WebCheckers</span>
+        <div class="entete-actions">
+            <button type="button" class="bouton bouton-gris bouton-petit" onclick="location.href='/menu';">Retour au menu</button>
+        </div>
+    </nav>
+
+    <div class="page-creation">
+        <div class="carte-creation">
+            <h1>Nouvelle partie</h1>
+
+            <form action="/game" method="post">
+                <div class="champ">
+                    <label for="gameName">Nom de la partie</label>
+                    <input type="text" id="gameName" name="gameName" required>
+                </div>
+
+                <div class="actions-creation">
+                    <button type="submit" class="bouton bouton-dore">Créer la partie</button>
+                    <a href="/menu">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- statut en ligne -->
+    <script>
+        (function() {
+            var userId = '{{ userId }}';
+            var username = '{{ username }}';
+            if (!userId) return;
+            var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            var ws = new WebSocket(protocol + '//' + location.host);
+            ws.onopen = function() {
+                ws.send(JSON.stringify({ type: 'authenticate', userId: userId, username: username }));
+            };
+            ws.onclose = function() {
+                setTimeout(function() { location.reload(); }, 5000);
+            };
+        })();
+    </script>
+</body>
+</html>

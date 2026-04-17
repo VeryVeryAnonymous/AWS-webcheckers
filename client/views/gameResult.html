@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultat — WebCheckers</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/gameResult.css">
+</head>
+<body class="page-resultat {{ resultClass }}">
+    <main class="carte-resultat">
+        <h1>Fin de la partie</h1>
+
+        {% if isWinner %}
+        <p class="texte-resultat">Bravo {{ username }} ! Tu as gagne cette partie.</p>
+        {% else %}
+        <p class="texte-resultat">Dommage {{ username }}. Tu as perdu cette partie.</p>
+        {% endif %}
+
+        <p class="stats-resultat">Ratio actualisé : <strong>{{ wins }} | {{ losses }}</strong> (Victoire | Defaite)</p>
+
+        <button type="button" class="bouton bouton-dore" onclick="location.href='/menu'">
+            Retour au menu
+        </button>
+    </main>
+    <!-- statut en ligne -->
+    <script>
+        (function() {
+            var userId = '{{ userId }}';
+            var username = '{{ username }}';
+            if (!userId) return;
+            var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            var ws = new WebSocket(protocol + '//' + location.host);
+            ws.onopen = function() {
+                ws.send(JSON.stringify({ type: 'authenticate', userId: userId, username: username }));
+            };
+            ws.onclose = function() {
+                setTimeout(function() { location.reload(); }, 5000);
+            };
+        })();
+    </script>
+</body>
+</html>

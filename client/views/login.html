@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion — WebCheckers</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body class="page-compte">
+    <div class="carte-compte">
+        <h1>WebCheckers</h1>
+        <p class="sous-titre">Connectez-vous pour jouer</p>
+
+        {% if error %}
+        <div class="erreur">{{ error }}</div>
+        {% endif %}
+
+        <form action="/menu" method="post">
+            <div class="champ">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" required autocomplete="off">
+            </div>
+            <div class="champ">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" required autocomplete="off">
+            </div>
+            <button type="submit" class="bouton bouton-rouge">Se connecter</button>
+            <a href="/register" class="lien-compte">Pas encore de compte ? Inscrivez-vous</a>
+        </form>
+    </div>
+</body>
+</html>

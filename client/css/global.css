@@ -1,0 +1,211 @@
+/* =====================================================================
+    STYLES GLOBAUX
+   Ce fichier contient les styles partagés par TOUTES les pages :
+   variables, reset, boutons, formulaires, entete et autres.
+
+   Chaque page importe ce fichier + son propre fichier CSS spécifique.
+   ===================================================================== */
+
+
+/* =====================================================================
+   1. VARIABLES
+   Modifier ces valeurs pour changer l'ensemble de la DA.
+   ===================================================================== */
+
+:root {
+    /* -- Arrière-plans -- */
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-card: #1f2b47;
+
+    /* -- Couleurs -- */
+    --rouge: #c0392b;
+    --rouge-hover: #e74c3c;
+    --dore: #f39c12;
+    --dore-hover: #e67e22;
+    --vert: #27ae60;
+    --vert-hover: #2ecc71;
+
+    /* -- Texte -- */
+    --texte: #ecf0f1;
+    --texte-secondaire: #a0aec0;
+
+    /* -- Bordures & ombres -- */
+    --bordure: #2d3a56;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --ombre: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --ombre-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+    /* -- Plateau de jeu -- */
+    --plateau-fonce: #5d4037;
+    --plateau-clair: #d7b899;
+    --plateau-bordure: #8B4513;
+    
+}
+
+
+/* =====================================================================
+   2. RESET & BASE 
+   ===================================================================== */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--texte);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+a {
+    color: var(--dore);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--dore-hover);
+    text-decoration: underline;
+}
+
+h1, h2, h3 {
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+
+/* =====================================================================
+   3. BOUTONS
+   ===================================================================== */
+
+.bouton {
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    text-align: center;
+}
+
+.bouton:active {
+    transform: scale(0.97);
+}
+
+.bouton-rouge {
+    background-color: var(--rouge);
+    color: white;
+}
+.bouton-rouge:hover {
+    background-color: var(--rouge-hover);
+}
+
+.bouton-gris {
+    background-color: var(--bg-secondary);
+    color: var(--texte);
+    border: 1px solid var(--bordure);
+}
+.bouton-gris:hover {
+    background-color: var(--bg-card);
+}
+
+.bouton-dore {
+    background-color: var(--dore);
+    color: var(--bg-primary);
+    font-weight: 700;
+}
+.bouton-dore:hover {
+    background-color: var(--dore-hover);
+}
+
+.bouton-vert {
+    background-color: var(--vert);
+    color: white;
+}
+.bouton-vert:hover {
+    background-color: var(--vert-hover);
+}
+
+.bouton-petit {
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+
+/* =====================================================================
+   4. FORMULAIRES
+   ===================================================================== */
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--bordure);
+    border-radius: var(--radius);
+    color: var(--texte);
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--dore);
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--texte-secondaire);
+    font-weight: 500;
+}
+
+.champ {
+    margin-bottom: 20px;
+}
+
+
+/* =====================================================================
+   5. ENTETE
+   ===================================================================== */
+
+.entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--bordure);
+}
+
+.entete-titre {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dore);
+}
+
+.entete-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+
+/* =====================================================================
+   6. AUTRES
+   ===================================================================== */
+
+.texte-centre { text-align: center; }
+.texte-dore   { color: var(--dore); }

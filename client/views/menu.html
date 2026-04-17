@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu — WebCheckers</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/menu.css">
+</head>
+<body>
+    <nav class="entete">
+        <span class="entete-titre">WebCheckers</span>
+        <div class="entete-actions">
+            <button id="friends-toggle" type="button" class="bouton bouton-gris bouton-petit" onclick="openFriendsMenu()">Amis</button>
+            <button type="button" class="bouton bouton-gris bouton-petit" onclick="location.href='/logout';">Deconnexion</button>
+        </div>
+    </nav>
+
+    <div class="page-menu">
+        <div class="accueil">
+            <h1>Bienvenue, <span class="texte-dore">{{ username }}</span></h1>
+            <p>Que souhaitez-vous faire ?</p>
+        </div>
+
+        <div class="grille-menu">
+            <div class="carte-menu" onclick="location.href='/createGame';">
+                <div class="carte-icone">+</div>
+                <div class="carte-titre">Nouvelle partie</div>
+                <div class="carte-description">Créer et configurer une partie</div>
+            </div>
+            <div class="carte-menu" onclick="location.href='/listGames';">
+                <div class="carte-icone">&#9776;</div>
+                <div class="carte-titre">Parties en cours</div>
+                <div class="carte-description">Rejoindre ou regarder</div>
+            </div>
+            <div class="carte-menu" onclick="document.getElementById('form-solo').submit();">
+                <div class="carte-icone">&#x1F3AE;</div>
+                <div class="carte-titre">Jouer en solo</div>
+                <div class="carte-description">Tester le jeu localement</div>
+            </div>
+            <form id="form-solo" action="/game" method="POST" style="display:none">
+                <input type="hidden" name="gameName" value="Partie Solo">
+                <input type="hidden" name="soloMode" value="true">
+            </form>
+        </div>
+    </div>
+
+    <div id="friends-overlay" class="overlay-amis" onclick="closeFriendsMenu()"></div>
+
+    <aside id="friends-menu" class="panel-amis">
+        <div class="panel-amis-entete">
+            <h2>Amis</h2>
+            <button type="button" class="bouton bouton-gris bouton-petit" onclick="closeFriendsMenu()">Fermer</button>
+        </div>
+
+        <!-- Recherche d'utilisateurs -->
+        <div class="amis-recherche">
+            <div class="amis-recherche-barre">
+                <input type="text" id="recherche-joueur" placeholder="Rechercher un joueur" autocomplete="off">
+                <button type="button" class="bouton bouton-dore bouton-petit" onclick="rechercherJoueur()">Chercher</button>
+            </div>
+            <div id="resultats-recherche" class="amis-resultats">
+                <!-- On AFfiche les résultats de recherche en dessous de la barre de recherche-->
+            </div>
+        </div>
+
+        <!-- Demandes d'amis reçues -->
+        <div class="amis-section">
+            <h3 class="amis-section-titre">Demandes reçues <span id="compteur-demandes" class="amis-compteur-demande" style="display:none;">0</span></h3>
+            <div id="liste-demandes" class="amis-liste">
+                <!-- Rempli dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Liste d'amis -->
+        <div class="amis-section">
+            <h3 class="amis-section-titre">Mes amis</h3>
+            <div id="liste-amis" class="amis-liste">
+                <!-- Rempli dynamiquement -->
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        var userId = '{{ userId }}';
+        var username = '{{ username }}';
+        var wsAmis = null;
+
+        function openFriendsMenu() {
+            document.getElementById('friends-menu').classList.add('open');
+            document.getElementById('friends-overlay').classList.add('open');
+        }
+
+        function closeFriendsMenu() {
+            document.getElementById('friends-menu').classList.remove('open');
+            document.getElementById('friends-overlay').classList.remove('open');
+        }
+
+        // WebSocket pour les notifications en temps réel
+        function connecterWebSocket() {
+            var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            wsAmis = new WebSocket(protocol + '//' + location.host);
+
+            wsAmis.onopen = function() {
+                wsAmis.send(JSON.stringify({
+                    type: 'authenticate',
+                    userId: userId,
+                    username: username
+                }));
+            };
+
+            wsAmis.onmessage = function(event) {
+                var message = JSON.parse(event.data);
+                switch (message.type) {
+                    case 'authenticated':
+                        chargerDonneesAmis();
+                        break;
+                    case 'demandeAmiRecue':
+                        ajouterDemandeRecue(message);
+                        break;
+                    case 'demandeAmiAcceptee':
+                        ajouterAmi(message);
+                        break;
+                    case 'amiEnLigne':
+                        mettreAJourStatutAmi(message.userId, true);
+                        break;
+                    case 'amiHorsLigne':
+                        mettreAJourStatutAmi(message.userId, false);
+                        break;
+                }
+            };
+
+            wsAmis.onclose = function() {
+                setTimeout(connecterWebSocket, 3000);
+            };
+        }
+
+        // Chargement des données d'amis et demandes
+        function chargerDonneesAmis() {
+            fetch('/api/friends/demandes')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.success) return;
+                    var liste = document.getElementById('liste-demandes');
+                    var compteur = document.getElementById('compteur-demandes');
+                    liste.innerHTML = '';
+
+                    if (data.demandes.length > 0) {
+                        compteur.textContent = data.demandes.length;
+                        compteur.style.display = 'inline';
+                    } else {
+                        compteur.style.display = 'none';
+                    }
+
+                    data.demandes.forEach(function(demande) {
+                        var ligne = document.createElement('div');
+                        ligne.className = 'amis-ligne';
+                        ligne.dataset.requestId = demande._id;
+
+                        var joueur = document.createElement('div');
+                        joueur.className = 'amis-joueur';
+                        var statut = document.createElement('span');
+                        statut.className = 'amis-statut hors-ligne';
+                        var pseudo = document.createElement('span');
+                        pseudo.className = 'amis-pseudo';
+                        pseudo.textContent = demande.fromUsername;
+                        joueur.appendChild(statut);
+                        joueur.appendChild(pseudo);
+
+                        var actions = document.createElement('div');
+                        actions.className = 'amis-ligne-actions';
+                        var btnAccepter = document.createElement('button');
+                        btnAccepter.type = 'button';
+                        btnAccepter.className = 'bouton bouton-vert bouton-petit';
+                        btnAccepter.textContent = 'Accepter';
+                        btnAccepter.addEventListener('click', function() { accepterDemande(demande._id); });
+                        var btnRefuser = document.createElement('button');
+                        btnRefuser.type = 'button';
+                        btnRefuser.className = 'bouton bouton-rouge bouton-petit';
+                        btnRefuser.textContent = 'Refuser';
+                        btnRefuser.addEventListener('click', function() { refuserDemande(demande._id); });
+                        actions.appendChild(btnAccepter);
+                        actions.appendChild(btnRefuser);
+
+                        ligne.appendChild(joueur);
+                        ligne.appendChild(actions);
+                        liste.appendChild(ligne);
+                    });
+                });
+
+            fetch('/api/friends/liste')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.success) return;
+                    var liste = document.getElementById('liste-amis');
+                    liste.innerHTML = '';
+
+                    data.amis.forEach(function(ami) {
+                        var statutClass = ami.enLigne ? 'en-ligne' : 'hors-ligne';
+                        var statutTexte = ami.enLigne ? 'En ligne' : 'Hors ligne';
+
+                        var ligne = document.createElement('div');
+                        ligne.className = 'amis-ligne';
+                        ligne.dataset.userId = ami.userId;
+
+                        var joueur = document.createElement('div');
+                        joueur.className = 'amis-joueur';
+                        var statut = document.createElement('span');
+                        statut.className = 'amis-statut ' + statutClass;
+                        var pseudo = document.createElement('span');
+                        pseudo.className = 'amis-pseudo';
+                        pseudo.textContent = ami.username;
+                        joueur.appendChild(statut);
+                        joueur.appendChild(pseudo);
+
+                        var etat = document.createElement('span');
+                        etat.className = 'amis-etat-texte ' + statutClass;
+                        etat.textContent = statutTexte;
+
+                        ligne.appendChild(joueur);
+                        ligne.appendChild(etat);
+                        liste.appendChild(ligne);
+                    });
+                });
+        }
+
+        // Recherche de joueurs (pour ajouter en amis)
+        function rechercherJoueur() {
+            var input = document.getElementById('recherche-joueur');
+            var query = input.value.trim();
+            var resultats = document.getElementById('resultats-recherche');
+
+            if (!query) {
+                resultats.innerHTML = '';
+                return;
+            }
+
+            fetch('/api/friends/rechercher?q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.success || !data.users.length) {
+                        resultats.innerHTML = '<p style="color:var(--texte-secondaire);font-size:13px;">Aucun joueur trouvé</p>';
+                        return;
+                    }
+                    resultats.innerHTML = '';
+                    data.users.forEach(function(user) {
+                        var ligne = document.createElement('div');
+                        ligne.className = 'amis-ligne';
+
+                        var joueur = document.createElement('div');
+                        joueur.className = 'amis-joueur';
+                        var statut = document.createElement('span');
+                        statut.className = 'amis-statut hors-ligne';
+                        var pseudo = document.createElement('span');
+                        pseudo.className = 'amis-pseudo';
+                        pseudo.textContent = user.username;
+                        joueur.appendChild(statut);
+                        joueur.appendChild(pseudo);
+
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'bouton bouton-dore bouton-petit';
+                        btn.textContent = 'Ajouter';
+                        btn.addEventListener('click', function() { envoyerDemande(user._id, user.username); });
+
+                        ligne.appendChild(joueur);
+                        ligne.appendChild(btn);
+                        resultats.appendChild(ligne);
+                    });
+                });
+        }
+
+        // Demands d'amis
+        function envoyerDemande(toUserId, toUsername) {
+            fetch('/api/friends/demande', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ toUserId: toUserId, toUsername: toUsername })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var resultats = document.getElementById('resultats-recherche');
+                if (data.success) {
+                    resultats.innerHTML = '<p style="color:var(--vert);font-size:13px;">Demande envoyée !</p>';
+                } else {
+                    resultats.innerHTML = '<p style="color:var(--rouge);font-size:13px;">' + (data.error || 'Erreur') + '</p>';
+                }
+            });
+        }
+        
+        function accepterDemande(requestId) {
+            fetch('/api/friends/accepter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId: requestId })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    chargerDonneesAmis();
+                }
+            });
+        }
+
+        function refuserDemande(requestId) {
+            fetch('/api/friends/refuser', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId: requestId })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    chargerDonneesAmis();
+                }
+            });
+        }
+
+        // Changement en temps réel du statut en ligne/hors-ligne des amis
+        function mettreAJourStatutAmi(amiUserId, enLigne) {
+            var ligne = document.querySelector('.amis-ligne[data-user-id="' + amiUserId + '"]');
+            if (!ligne) return;
+
+            var pastille = ligne.querySelector('.amis-statut');
+            var texte = ligne.querySelector('.amis-etat-texte');
+
+            if (pastille) {
+                pastille.classList.remove('en-ligne', 'hors-ligne');
+                pastille.classList.add(enLigne ? 'en-ligne' : 'hors-ligne');
+            }
+            if (texte) {
+                texte.classList.remove('en-ligne', 'hors-ligne');
+                texte.classList.add(enLigne ? 'en-ligne' : 'hors-ligne');
+                texte.textContent = enLigne ? 'En ligne' : 'Hors ligne';
+            }
+        }
+
+        function ajouterDemandeRecue(message) {
+            chargerDonneesAmis();
+        }
+
+        function ajouterAmi(message) {
+            chargerDonneesAmis();
+        }
+
+        // Permet de lancer la recherche en appuyant sur "Entrée" dans le champ de recherche
+        document.getElementById('recherche-joueur').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                rechercherJoueur();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (userId) {
+                connecterWebSocket();
+            }
+        });
+    </script>
+</body>
+</html>

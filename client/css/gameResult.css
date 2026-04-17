@@ -1,0 +1,52 @@
+/* =====================================================================
+   Page Résultat — Victoire / Défaite
+   ===================================================================== */
+
+.page-resultat {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.page-resultat.victoire {
+    background: linear-gradient(135deg, #1a4a2e 0%, #27ae60 100%);
+}
+
+.page-resultat.defaite {
+    background: linear-gradient(135deg, #4a1a1a 0%, #c0392b 100%);
+}
+
+.carte-resultat {
+    width: min(90vw, 600px);
+    background-color: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 48px 36px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+    box-shadow: var(--ombre-lg);
+}
+
+.carte-resultat h1 {
+    font-size: 28px;
+    margin-bottom: 16px;
+}
+
+.carte-resultat .texte-resultat {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.carte-resultat .stats-resultat {
+    font-size: 16px;
+    margin-bottom: 32px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.carte-resultat .bouton {
+    padding: 14px 28px;
+    font-size: 16px;
+}
